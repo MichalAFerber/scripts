@@ -8,8 +8,8 @@ These are general-purpose scripts maintained directly in this repository:
 
 | Folder              | Script              | Description                                                       |
 |---------------------|---------------------|-------------------------------------------------------------------|
-| `plex-media-server` | [`plex-xml.py`](plex-media-server/plex-xml.py) | Reads a Plex XML export (plex.xml) and extracts movie titles and file paths, saving them as a dated CSV for easy review or processing. |
-| `plex-media-server` | [`plex-xml-compare.py`](plex-media-server/plex-xml-compare.py) | Compares the Plex XML movie list with the actual files present in a specified media directory (default /mnt/plexmedia), generating a CSV report that shows whether each movie file exists or is missing on disk. |
+| plex-media-server | [plex-xml.py](plex-media-server/plex-xml.py) | Reads a Plex XML export (plex.xml) and extracts movie titles and file paths, saving them as a dated CSV for easy review or processing. |
+| plex-media-server | [plex-xml-compare.py](plex-media-server/plex-xml-compare.py) | Compares the Plex XML movie list with the actual files present in a specified media directory (default /mnt/plexmedia), generating a CSV report that shows whether each movie file exists or is missing on disk. |
 
 > Note: You can clone and execute any of these directly.
 
