@@ -44,4 +44,4 @@ Thanks again for contributing and helping improve this collection!
 
 ---
 
-Michal
+Michal [`TechGuyWithABeard`]
