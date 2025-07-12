@@ -1,21 +1,44 @@
-# 🛠 Michal's Script Collection
+# MichalAFerber's Useful Scripts
 
-A collection of practical Bash scripts and helpers I use across my Linux systems, Raspberry Pi devices, and self-hosted environments.
+A curated collection of personal scripts and utilities organized by application or task. These scripts range from media management, system maintenance, to Docker service helpers, and Kavita-specific renaming tools.
 
-## 📂 Scripts in This Repo
+## Table of Contents
 
-These are general-purpose scripts maintained directly in this repository:
+- [MichalAFerber's Useful Scripts](#michalaferbers-useful-scripts)
+  - [Table of Contents](#table-of-contents)
+  - [plex-media-server/](#plex-media-server)
+  - [rsync/](#rsync)
+  - [docker/](#docker)
+  - [kavita/](#kavita)
+  - [📦 External Script Projects](#-external-script-projects)
+  - [Usage](#usage)
+  - [License](#license)
 
-| Folder              | Script              | Description                                                       |
-|---------------------|---------------------|-------------------------------------------------------------------|
-| docker | [start-docker-services.sh](docker/start-docker-services.sh) | Starts and monitors Docker Compose and standalone containers, restarts unhealthy ones, connects networks, and verifies availability. |
-| kavita | [rename_comics.py](kavita/rename_comics.py) | Renames comic archives for Kavita, using title/year/issue format. Supports mapped issue-to-year overrides, special issue tagging, and backups. |
-| kavita | [rename_magazines.py](kavita/rename_magazines.py) | Renames magazine archives to Kavita's `Title - Year - Issue` format. Uses known year mappings, adds "Special" where applicable, flattens folders, and preserves originals. |
-| plex-media-server | [plex-xml.py](plex-media-server/plex-xml.py) | Reads a Plex XML export (plex.xml) and extracts movie titles and file paths, saving them as a dated CSV for easy review or processing. |
-| plex-media-server | [plex-xml-compare.py](plex-media-server/plex-xml-compare.py) | Compares the Plex XML movie list with the actual files present in a specified media directory (default /mnt/plexmedia), generating a CSV report that shows whether each movie file exists or is missing on disk. |
-| rsync   | [sync_folders.py](rsync/sync_folders.py) | Performs a two-way sync using `rsync`, with logging, error handling, and optional `--dry-run`. |
+## plex-media-server/
 
-> Note: You can clone and execute any of these directly.
+| Script               | Description                                                             |
+|----------------------|-------------------------------------------------------------------------|
+| plex-xml.py          | Parses Plex library XML export to generate a CSV list of all movies.    |
+| plex-xml-compare.py  | Compares Plex library XML export against local media directory files to find discrepancies. |
+
+## rsync/
+
+| Script               | Description                                               |
+|----------------------|-----------------------------------------------------------|
+| sync_folders.py      | Synchronizes two folders bidirectionally using `rsync`, with logging and error handling. |
+
+## docker/
+
+| Script               | Description                                               |
+|----------------------|-----------------------------------------------------------|
+| start-docker-services.sh | Automates starting and monitoring multiple Docker Compose services and standalone containers, including health checks and network management. |
+
+## kavita/
+
+| Script               | Description                                               |
+|----------------------|-----------------------------------------------------------|
+| rename_comics.py     | Renames comic book files to Kavita naming conventions, with issue/year detection and backup of originals. |
+| rename_magazines.py  | Renames magazine files to Kavita naming conventions, supports issue/year mapping, special issues, and backups originals. |
 
 ## 📦 External Script Projects
 
@@ -27,18 +50,19 @@ These are maintained in dedicated repositories but are part of my broader toolse
 - [`IMDbMovieFileFixer`](https://github.com/MichalAFerber/IMDbMovieFileFixer)  
   🎬 Renames movie files using IMDb metadata—ideal for tidying up Plex and Jellyfin libraries.
 
-## 🚀 Usage
+## Usage
 
-You can run scripts directly or clone the repository:
+- Most scripts are standalone and require Python 3 or bash.
+- Navigate into the script's folder or run scripts with full path.
+- Review script comments at the top for any specific usage instructions or configuration needed.
+- Kavita scripts assume specific folder structures and may require customizing base directories.
+- Docker scripts require Docker and Docker Compose installed and configured.
+- Rsync script requires `rsync` installed on the system.
 
-```bash
-git clone https://github.com/MichalAFerber/scripts.git
-cd scripts
-./ScriptFileName
-```
+## License
 
-🧠 License
-All scripts in this repository are open source under the MIT License unless otherwise noted.
+All scripts in this repository are licensed under the [MIT License](LICENSE).
 
-🙋‍♂️ Contributions
-Suggestions, forks, and pull requests are welcome. This is a living collection of tools that evolve with my workflow.
+---
+
+Thank you for checking out my scripts! Feel free to fork, use, and improve them.
