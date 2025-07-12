@@ -1,10 +1,10 @@
-# MichalAFerber's Useful Scripts
+# Michal Ferber's Useful Scripts
 
 A curated collection of personal scripts and utilities organized by application or task. These scripts range from media management, system maintenance, to Docker service helpers, and Kavita-specific renaming tools.
 
 ## Table of Contents
 
-- [MichalAFerber's Useful Scripts](#michalaferbers-useful-scripts)
+- [Michal Ferber's Useful Scripts](#michal-ferbers-useful-scripts)
   - [Table of Contents](#table-of-contents)
   - [plex-media-server/](#plex-media-server)
   - [rsync/](#rsync)
