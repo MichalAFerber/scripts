@@ -1,9 +1,19 @@
-# Suggested Usage
-# python3 sync_folders.py /mnt/storage1/books /mnt/storage2/books
-# Or to preview without making changes:
-# python3 sync_folders.py /mnt/storage1/books /mnt/storage2/books --dry-run
-
 #!/usr/bin/env python3
+"""
+sync_folders.py - Bascic Two-Way Folder Synchronization
+
+Sync two folders using rsync
+
+Author: Michal A. Ferber
+License: MIT
+Repo: https://github.com/MichalAFerber/scripts
+
+Usage:
+    - python3 sync_folders.py /mnt/storage1/books /mnt/storage2/books
+    - Or to preview without making changes
+    - python3 sync_folders.py /mnt/storage1/books /mnt/storage2/books --dry-run
+"""
+
 import subprocess
 import logging
 import sys
