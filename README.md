@@ -6,26 +6,20 @@ A curated collection of personal scripts and utilities organized by application 
 
 - [Michal Ferber's Useful Scripts](#michal-ferbers-useful-scripts)
   - [Table of Contents](#table-of-contents)
-  - [plex-media-server/](#plex-media-server)
-  - [rsync/](#rsync)
+  - [comics/](#comics)
   - [docker/](#docker)
   - [kavita/](#kavita)
+  - [plex-media-server/](#plex-media-server)
+  - [rsync/](#rsync)
   - [📦 External Script Projects](#-external-script-projects)
   - [Usage](#usage)
   - [License](#license)
 
-## plex-media-server/
-
-| Script               | Description                                                             |
-|----------------------|-------------------------------------------------------------------------|
-| plex-xml.py          | Parses Plex library XML export to generate a CSV list of all movies.    |
-| plex-xml-compare.py  | Compares Plex library XML export against local media directory files to find discrepancies. |
-
-## rsync/
+## comics/
 
 | Script               | Description                                               |
 |----------------------|-----------------------------------------------------------|
-| sync_folders.py      | Synchronizes two folders bidirectionally using `rsync`, with logging and error handling. |
+| process_comics | Shell script to automatically rename and optionally convert `.cbr` files to `.cbz`, generate embedded `ComicInfo.xml`. |
 
 ## docker/
 
@@ -39,6 +33,19 @@ A curated collection of personal scripts and utilities organized by application 
 |----------------------|-----------------------------------------------------------|
 | rename_comics.py     | Renames comic book files to Kavita naming conventions, with issue/year detection and backup of originals. |
 | rename_magazines.py  | Renames magazine files to Kavita naming conventions, supports issue/year mapping, special issues, and backups originals. |
+
+## plex-media-server/
+
+| Script               | Description                                                             |
+|----------------------|-------------------------------------------------------------------------|
+| plex-xml.py          | Parses Plex library XML export to generate a CSV list of all movies.    |
+| plex-xml-compare.py  | Compares Plex library XML export against local media directory files to find discrepancies. |
+
+## rsync/
+
+| Script               | Description                                               |
+|----------------------|-----------------------------------------------------------|
+| sync_folders.py      | Synchronizes two folders bidirectionally using `rsync`, with logging and error handling. |
 
 ## 📦 External Script Projects
 

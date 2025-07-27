@@ -107,3 +107,7 @@ Make sure all utilities are in your `$PATH`.
 * Use `--dry-run` before first real run to check behavior.
 * Customize XML content or regex in script if your naming convention changes.
 * Run `./process_comics.sh` from root of your comics directory to scan all subfolders.
+
+## License
+
+All scripts in this repository are licensed under the [MIT License](../LICENSE).
