@@ -1,108 +1,109 @@
-# Comic Library Organizer (process_comics.sh)
+# 📚 process\_comics.sh
 
-This script helps maintain a clean and standardized comic library for apps like **Kavita**, **Komga**, and **YACReader**.
+Shell script to automatically rename and optionally convert `.cbr` files to `.cbz`, generate embedded `ComicInfo.xml`, and log operations — recursively from current directory.
 
-## How It Works
+## 🚀 What it Does
 
-- Recursively scans the current directory (and all subfolders) for `.cbz` and `.cbr` files
-- Renames comics to a consistent format:
+* Finds comic archive files (`*.cbz` and `*.cbr`) in current directory and subdirectories.
+* Parses out series name, issue number, and year.
+* Renames to standardized format:
 
-```bash
-Series Name #NNN (YYYY).cbz
-````
+  ```bash
+  Series Name #NNN (YYYY).cbz
+  Series Name #NNN (YYYY).cbr
+  ```
 
-- Cleans up tags like `(Digital)`, `(WebRip)`, `(ScanGroup)` etc.
-- Defaults year to `(0000)` if missing
-- Converts ZIP-based `.cbr` files into `.cbz` automatically (true RAR `.cbr` files are left untouched)
-- Generates and embeds a `ComicInfo.xml` file for every `.cbz`
-- Keeps `.cbr` files untouched (renamed only)
-- Logs every run to `logs/process_comics-YYYY-MM-DD-HHMM.txt`
+  If year is missing or unrecognized, defaults to `0000`.
+* Converts `.cbr` (RAR‑based) to `.cbz` if `--convert` flag set; otherwise just renames `.cbr`.
+* Embeds a basic `ComicInfo.xml` (with metadata tags like `<Title>`, `<Series>`, `<IssueNumber>`, `<Year>`).
+* Logs actions to `logs/process_comics-YYYY-MM-DD-HHMM.txt`, and rotates automatically per run.
+* Supports:
 
----
+  * `--dry-run` (show planned changes).
+  * `--regen` (regenerate `ComicInfo.xml` even if it exists).
 
-## Usage
-
-From inside your `Comics/` folder:
-
-### Preview changes (dry-run)
+## 🧪 Usage
 
 ```bash
-./process_comics.sh --dry-run
-````
-
-### Rename / Convert / Add metadata
-
-```bash
-./process_comics.sh
+cd /path/to/comics
+./process_comics.sh [--dry-run] [--convert] [--regen]
 ```
 
-### Regenerate ComicInfo.xml for all `.cbz`
+### Example Runs
+
+#### Dry-run only renaming and regen
 
 ```bash
-./process_comics.sh --regen
+./process_comics.sh --dry-run --regen
 ```
 
-Logs are stored in `Comics/logs/`.
-
----
-
-## Examples
-
-### Before → After
+#### Full processing — converting `.cbr` to `.cbz` and embedding xml
 
 ```bash
-Superman 018 (2024) (WebRip) (Group).cbr
-→ Superman #018 (2024).cbr
+./process_comics.sh --convert
 ```
 
-```bash
-IndieComic 1.cbz
-→ IndieComic #001 (0000).cbz
-```
+## 📁 Before / After Examples
 
-```bash
-SomeSeries 005.cbr  [zip disguised as cbr]
-→ SomeSeries #005 (2019).cbz
-```
+| Before Filename                           | After Filename                              |
+| ----------------------------------------- | ------------------------------------------- |
+| `Captain Marvel Adventures (1941) #1.cbr` | `Captain Marvel Adventures #001 (1941).cbz` |
+| `The Spirit (1952) #2.cbz`                | `The Spirit #002 (1952).cbz`                |
+| `Amazing-Man Comics-008-1939.cbz`         | `Amazing-Man Comics #008 (1939).cbz`        |
+| `Say Hello to Blackjack (v01).cbz`        | `Say Hello to Blackjack #001 (0000).cbz`    |
 
-```bash
-The Amazing Spider-Man v2 #05 [HD Scans].cbz
-→ The Amazing Spider-Man #005 (0000).cbz
-```
+## 📦 ComicInfo.xml Content
 
----
-
-## ComicInfo.xml Contents
-
-For `.cbz` files, the script creates a `ComicInfo.xml` like this:
+Each generated `ComicInfo.xml` includes:
 
 ```xml
 <ComicInfo>
-  <Title>Series Name #001</Title>
+  <Title>Series Name #NNN</Title>
   <Series>Series Name</Series>
-  <Number>001</Number>
-  <Year>2024</Year>
-  <Month>1</Month>
-  <Summary>Added by process_comics.sh</Summary>
-  <Publisher>Unknown</Publisher>
-  <Genre>Comics</Genre>
-  <LanguageISO>en</LanguageISO>
+  <IssueNumber>NNN</IssueNumber>
+  <Year>YYYY</Year>
+  <Writer></Writer>
+  <Publisher></Publisher>
+  <Summary></Summary>
 </ComicInfo>
 ```
 
-These fields follow the ComicInfo XML standard (compatible with Kavita, Komga, etc.).
+* Title, Series, IssueNumber, Year are required.
+* Writer, Publisher, Summary are blank placeholders you can edit manually.
 
----
+Scripts automatically embed the XML inside the ZIP archive.
 
-## Notes
+## 📝 Logging
 
-- Safe to re-run any time; already processed files are skipped
-- `.cbr` files are not modified except for renaming
-- `.cbz` files are modified to include ComicInfo.xml
-- Logs are timestamped and never overwritten
+* Each run writes to `logs/process_comics-YYYY-MM-DD-HHMM.txt`
+* Includes start and end timestamps.
+* Logs actions (e.g. “Renaming X → Y”, “Converted”, “Skipped already formatted”, “Embedded ComicInfo.xml”).
+* Supports `--dry-run` to preview without modifying files.
 
----
+Log files accumulate indefinitely unless manually cleaned.
 
-## License
+## 🔧 Requirements
 
-MIT License
+* Bash shell
+* `zip`, `unzip` (for `.cbr` → `.cbz`)
+* `unrar` (if converting `.cbr` files)
+* `awk`, `sed`, `printf`, `date`, etc. (standard Linux/macOS utilities)
+
+Make sure all utilities are in your `$PATH`.
+
+## ⚙️ Installation
+
+1. Place `process_comics.sh` in your `Comics/` directory.
+2. Make executable:
+
+   ```bash
+   chmod +x process_comics.sh
+   ```
+
+3. Commit to GitHub under the `comics/` folder of your repo `MichalAFerber/scripts`.
+
+## 🧠 Tips
+
+* Use `--dry-run` before first real run to check behavior.
+* Customize XML content or regex in script if your naming convention changes.
+* Run `./process_comics.sh` from root of your comics directory to scan all subfolders.
