@@ -41,7 +41,7 @@ with open(filename, 'w', newline='') as csvfile:
         
         if file:
             # Adjust the file path for comparison
-            stripped_file_path = file.replace("/Volumes/G-Drive/PlexMedia/Movies/", "")
+            stripped_file_path = file.replace("/Volumes/G-DRIVE 12TB/PlexMedia/Movies/", "")
             files_in_xml.add(stripped_file_path)
             # Check if the file exists in the directory
             exists_in_directory = 'Yes' if stripped_file_path in files_in_directory else 'No'
