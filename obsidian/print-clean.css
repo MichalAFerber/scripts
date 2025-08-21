@@ -1,0 +1,26 @@
+@media print {
+  /* Prevent a blank page if the doc starts/ends with an <hr> */
+  hr:first-child,
+  hr:last-child {
+    break-before: auto;
+    display: none;
+  }
+
+  /* (Keep your existing rules) */
+  hr {
+    break-before: page;
+    page-break-before: always;
+    border: 0;
+    border-top: 2px solid #000;
+    margin: 0 0 1rem 0;
+  }
+
+  .markdown-preview-view table,
+  .markdown-preview-view pre,
+  .markdown-preview-view blockquote,
+  .markdown-preview-view ul,
+  .markdown-preview-view ol { break-inside: avoid; }
+
+  body, .markdown-preview-view { background:#fff !important; color:#000 !important; }
+  .markdown-preview-view * { color:#000 !important; }
+}
