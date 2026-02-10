@@ -1,8 +1,25 @@
 #!/usr/bin/env bash
+# rclone-wasabi-ferber-storage.sh - Copy/Sync a Local Folder to Wasabi S3 via rclone
+#
+# Uploads a local directory to a Wasabi S3 bucket using rclone, with optional
+# integrity verification. Supports both copy (additive) and sync (mirror) modes.
+#
+# Usage:
+#   ./rclone-wasabi-ferber-storage.sh <SRC> [DEST_PREFIX] [--dry-run] [--verify] [--sync]
+#
+# Environment / config:
+#   WASABI_REMOTE  - rclone remote name (hardcoded: wasabi-ferber)
+#   DEST_BUCKET    - S3 bucket name (hardcoded: ferber-storage)
+#
+# Prerequisites:
+#   - rclone installed and configured with a "wasabi-ferber" remote
+#   - Wasabi S3 credentials configured in rclone
+#
+# See --help for full options and examples.
 set -euo pipefail
 
 # ========= Defaults =========
-SRC_DEFAULT="~/Downloads"
+SRC_DEFAULT="$HOME/Downloads"
 # Default DEST_PREFIX includes today's date (YYYY-MM-DD)
 DEST_PREFIX_DEFAULT="backups/$(date +%F)"
 
@@ -102,7 +119,7 @@ RC_FLAGS=(
   --exclude ".DS_Store" --exclude "._*" --exclude ".Spotlight-*"
   --exclude ".Trashes"
 )
-$DRY_RUN && RC_FLAGS+=(--dry-run)
+[[ "$DRY_RUN" == "true" ]] && RC_FLAGS+=(--dry-run)
 
 # ========= Copy/Sync =========
 echo "Starting rclone $OPERATION..."
@@ -116,7 +133,7 @@ echo
 echo "Transfer phase complete."
 
 # ========= Verify (optional) =========
-if $VERIFY; then
+if [[ "$VERIFY" == "true" ]]; then
   echo
   echo "Starting verify (rclone check, one-way)..."
   # --one-way: ignore extra files in DEST (useful even after sync to focus on mismatches)

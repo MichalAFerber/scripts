@@ -1,4 +1,16 @@
 #!/bin/bash
+# generate_comicinfo.sh - Create ComicInfo.xml for Amazing-Man Comics
+#
+# Generates ComicInfo.xml metadata files for each CBZ/CBR in the target directory.
+# For CBZ files, the XML is embedded directly into the archive. For CBR files,
+# the XML is left alongside the file (CBR archives can't be safely modified).
+#
+# Usage:
+#   cd ~/Desktop/Amazing-Man-Comics && bash generate_comicinfo.sh
+#
+# Expected filename format: "Amazing-Man Comics #005 (1939).cbz"
+# The series name is hardcoded to "Amazing-Man Comics".
+
 # Folder containing your comics
 COMIC_DIR="$HOME/Desktop/Amazing-Man-Comics"
 
@@ -11,8 +23,8 @@ for f in *.{cbz,cbr}; do
   # Extract details from filename
   # Example filename: Amazing-Man Comics #005 (1939).cbz
   series="Amazing-Man Comics"
-  issue=$(echo "$f" | grep -oP '#\K[0-9]+')
-  year=$(echo "$f" | grep -oP '\(\K[0-9]{4}(?=\))')
+  issue=$(echo "$f" | sed -n 's/.*#\([0-9]*\).*/\1/p')
+  year=$(echo "$f" | sed -n 's/.*(\([0-9]\{4\}\)).*/\1/p')
   ext="${f##*.}"
   base="${f%.*}"
 

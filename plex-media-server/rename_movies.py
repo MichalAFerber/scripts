@@ -1,7 +1,26 @@
 #!/usr/bin/env python3
+"""
+rename_movies.py - Auto-Rename Movie Files to Plex-Friendly Format
+
+Walks a movie directory and renames video files to "Movie Name (YYYY).ext" format.
+First tries to extract the year from the filename; if not found, queries IMDb
+for the correct title and year.
+
+Usage:
+    pip install cinemagoer    # (formerly IMDbPY)
+    python3 rename_movies.py
+
+Configuration:
+    MOVIES_DIR  - Path to your Plex movie library (edit in script)
+    VIDEO_EXTS  - Set of video file extensions to process
+
+Filename patterns recognized:
+    Movie.Name.2020.1080p.mkv  ->  Movie Name (2020).mkv
+    Movie Name (2020).mkv      ->  (already correct, skipped)
+    Movie Name.mkv             ->  (IMDb lookup for year)
+"""
 import os
 import re
-import sys
 from imdb import IMDb
 
 # --- Configuration ---
@@ -46,7 +65,7 @@ def main():
                 continue
 
             # Attempt to extract title and year from filename
-            m = re.match(r'^(?P<title>.+?)[\.\s\-_]*\(?P<year>\d{4}\)?.*$', base)
+            m = re.match(r'^(?P<title>.+?)[\.\s\-_]*\(?(?P<year>\d{4})\)?.*$', base)
             year = None
             if m:
                 title_guess = m.group('title')
@@ -72,7 +91,7 @@ def main():
 
             if old_path != new_path:
                 print(f"Renaming:\n  {fname}\n→ {new_name}\n")
-                os.rename(old_path, new_path)  # uses os.rename :contentReference[oaicite:4]{index=4}
+                os.rename(old_path, new_path)
 
 if __name__ == "__main__":
     main()

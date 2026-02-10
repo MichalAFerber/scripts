@@ -1,4 +1,20 @@
 #!/usr/bin/env bash
+# process_comics.sh - Batch Rename, Convert, and Tag Comic Archives
+#
+# Recursively processes CBZ/CBR files in the current directory:
+#   1. Normalizes filenames to "Series #001 (YYYY).ext" format
+#   2. Detects ZIP files mislabeled as .cbr and converts them to .cbz
+#   3. Generates and embeds ComicInfo.xml metadata into CBZ archives
+#
+# Usage:
+#   cd /path/to/comics && bash process_comics.sh [--dry-run] [--regen]
+#
+# Options:
+#   --dry-run   Preview renames without making changes
+#   --regen     Re-embed ComicInfo.xml into already-formatted CBZ files
+#
+# Logs output to logs/process_comics-<timestamp>.txt
+
 shopt -s nullglob
 
 # Directories
@@ -103,15 +119,18 @@ process_file() {
 
   log "Auto-cleaning: $file -> $new_path"
 
+  local new_base
+  new_base=$(basename "$new_path")
   if [[ "$ext" == ".cbr" ]]; then
     if is_zip_cbr "$file"; then
       new_path="${new_path%.cbr}.cbz"
+      new_base=$(basename "$new_path")
       log "Converting mislabeled ZIP-based CBR to CBZ: $file -> $new_path"
       tmpdir=$(mktemp -d)
       unzip -qq "$file" -d "$tmpdir"
-      generate_comicinfo "$new_path"
+      generate_comicinfo "$new_base"
       mv ComicInfo.xml "$tmpdir/"
-      (cd "$tmpdir" && zip -qq -r "../$new_path" .)
+      (cd "$tmpdir" && zip -qq -r "$OLDPWD/$new_path" .)
       rm -rf "$tmpdir"
       rm "$file"
     else
@@ -119,8 +138,8 @@ process_file() {
     fi
   else
     mv -n "$file" "$new_path"
-    generate_comicinfo "$new_path"
-    (cd "$dir" && zip -j "$new_name" "$OLDPWD/ComicInfo.xml" >/dev/null)
+    generate_comicinfo "$new_base"
+    (cd "$dir" && zip -j "$new_base" "$OLDPWD/ComicInfo.xml" >/dev/null)
     rm ComicInfo.xml
   fi
 }

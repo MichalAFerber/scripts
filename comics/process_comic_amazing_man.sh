@@ -70,7 +70,7 @@ for f in Amazing-Man-Comics-*; do
     tmpdir=$(mktemp -d)
     unzip -qq "$newname" -d "$tmpdir"
     rm "$newname"
-    zip -qr "${newname%.cbr}.cbz" "$tmpdir"
+    (cd "$tmpdir" && zip -qr - .) > "${newname%.cbr}.cbz"
     rm -rf "$tmpdir"
     newname="${newname%.cbr}.cbz"
     ext="cbz"

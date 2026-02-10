@@ -1,0 +1,2 @@
+# Nightly at 2:45am local time
+45 2 * * * /usr/local/bin/macos-restic-backup.sh >/dev/null 2>&1

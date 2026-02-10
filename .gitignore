@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Backup files
+*.bak
+
+# Temp staging
+_temp_/
+
+# Environment / secrets
+.env
+*.env
+config.json
+
+# IDE
+.vscode/
+.idea/
