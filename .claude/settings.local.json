@@ -18,7 +18,8 @@
       "Bash(ls:*)",
       "Bash(echo:*)",
       "Bash(for d in kavita kopia misc ubuntu)",
-      "Bash(do ls -la \"$d/\")"
+      "Bash(do ls -la \"$d/\")",
+      "Bash(git -C /Volumes/Mando/GitHub/scripts status --short)"
     ]
   }
 }

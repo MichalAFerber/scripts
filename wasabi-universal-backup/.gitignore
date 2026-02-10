@@ -1,9 +1,0 @@
-# Logs
-Logs/
-*.log
-
-# OS
-.DS_Store
-
-# Env
-.env
