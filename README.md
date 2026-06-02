@@ -24,6 +24,7 @@ Cloud and local backup automation using restic, rclone, and Wasabi S3.
 | `wasabi-consolidate.sh` | Consolidate and deduplicate Wasabi storage |
 | `s3_backup.py` | Python incremental S3 backup |
 | `sync_to_wasabi.sh` | Interactive Wasabi cloud sync for external drives |
+| `wasabi-purge.sh` | Wrapper: `rclone delete --min-age 90d` + `rclone rmdirs --leave-root` |
 
 ### cloudflare/
 Cloudflare domain management and diagnostics.
@@ -152,7 +153,7 @@ Linux/macOS system maintenance and monitoring.
 
 | Language | Count |
 |----------|-------|
-| Bash | 39 |
+| Bash | 40 |
 | Python | 20 |
 | PowerShell | 7 |
 
