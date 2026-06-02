@@ -1,0 +1,22 @@
+# macOS excludes (edit as needed)
+# Paths are relative to the backup source root (typically /Users/<you>)
+# Large caches and temp files
+Library/Caches/**
+Library/Containers/com.apple.mail/Data/Library/Caches/**
+Library/Containers/com.apple.Safari/Data/Library/Caches/**
+Library/Containers/com.apple.news/**
+Library/Group Containers/*/Library/Caches/**
+# Node / build artifacts
+**/node_modules/**
+**/.cache/**
+**/dist/**
+# VMs and huge images (back up separately)
+VirtualBox VMs/**
+Parallels/**
+Docker.qcow2
+# Downloads (optional)
+Downloads/**
+# Media managed elsewhere (optional)
+Movies/**
+Music/**
+Pictures/**

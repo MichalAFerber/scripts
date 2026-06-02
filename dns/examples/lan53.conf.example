@@ -1,0 +1,27 @@
+server:
+  interface: 192.168.50.2
+  interface: 127.0.0.1
+  port: 53
+
+  do-ip4: yes
+  do-udp: yes
+  do-tcp: yes
+
+  access-control: 127.0.0.0/8 allow
+  access-control: 192.168.50.0/24 allow
+
+  root-hints: "/var/lib/unbound/root.hints"
+
+  hide-identity: yes
+  hide-version: yes
+  harden-glue: yes
+  harden-dnssec-stripped: yes
+  qname-minimisation: yes
+  aggressive-nsec: yes
+  prefetch: yes
+  edns-buffer-size: 1232
+
+  cache-min-ttl: 3600
+  cache-max-ttl: 86400
+
+  verbosity: 0

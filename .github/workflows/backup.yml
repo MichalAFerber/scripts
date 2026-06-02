@@ -1,0 +1,49 @@
+name: Wasabi Backup (Self-Hosted)
+
+on:
+  workflow_dispatch:
+    inputs:
+      src:
+        description: 'Source path on the self-hosted runner'
+        required: true
+      dest_sub:
+        description: 'Destination subfolder under ferber-storage (default auto-date if blank)'
+        required: false
+      mode:
+        description: 'copy or sync'
+        required: false
+        default: 'copy'
+      verify:
+        description: 'Run rclone check after transfer (true/false)'
+        required: false
+        default: 'false'
+      excludes:
+        description: 'Path to excludes file (optional)'
+        required: false
+jobs:
+  backup:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Ensure rclone present
+        run: rclone version
+
+      - name: Run backup (Bash)
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="${{ github.event.inputs.src }}"
+          DEST_SUB="${{ github.event.inputs.dest_sub }}"
+          MODE="${{ github.event.inputs.mode }}"
+          VERIFY="${{ github.event.inputs.verify }}"
+          EXCLUDES="${{ github.event.inputs.excludes }}"
+
+          cmd=( "./scripts/universal_backup.sh" "--src" "$SRC" "--mode" "$MODE" )
+          [[ -n "$DEST_SUB" ]] && cmd+=( "--dest-sub" "$DEST_SUB" )
+          [[ -n "$EXCLUDES" ]] && cmd+=( "--excludes" "$EXCLUDES" )
+          [[ "$VERIFY" == "true" ]] && cmd+=( "--verify" )
+
+          echo "Running: ${cmd[*]}"
+          "${cmd[@]}"

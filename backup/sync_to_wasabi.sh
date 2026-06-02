@@ -15,9 +15,12 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Drive paths
-RED_DRIVE="/Volumes/Blackbox E Red"
-BLUE_DRIVE="/Volumes/Blackbox E Blue"
-WASABI_PATH="/Users/michal/Library/CloudStorage/MountainDuck-s3.us-east-1.wasabisys.com–S3/ferber-storage"
+# Override via env vars: SRC_RED, SRC_BLUE, WASABI_MOUNT_BASE, WASABI_BUCKET
+RED_DRIVE="${SRC_RED:-/Volumes/Blackbox E Red}"
+BLUE_DRIVE="${SRC_BLUE:-/Volumes/Blackbox E Blue}"
+WASABI_MOUNT_BASE="${WASABI_MOUNT_BASE:-$HOME/Library/CloudStorage/MountainDuck-s3.us-east-1.wasabisys.com–S3}"
+WASABI_BUCKET="${WASABI_BUCKET:-ferber-storage}"
+WASABI_PATH="${WASABI_MOUNT_BASE}/${WASABI_BUCKET}"
 
 # Log directory
 LOG_DIR="$HOME/Documents/Logs"

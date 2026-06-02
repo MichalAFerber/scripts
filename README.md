@@ -6,6 +6,16 @@ A curated collection of automation scripts for home lab management, backup strat
 
 Every script that modifies, copies, moves, or deletes files supports a `--dry-run` flag (or `-DryRun`/`-WhatIf` for PowerShell) so you can preview changes before committing them.
 
+**Supporting structure:**
+
+- `backup/systemd/` + `backup/cron/` — schedulers for backup scripts
+- `backup/excludes/` — restic / universal_backup exclude lists
+- `backup/.env.sample` + `backup/rclone-remote-example.md` — config templates for `universal_backup.sh`
+- `dns/systemd/` + `dns/examples/` — Unbound systemd timer pair + zone/server config samples
+- `sync/systemd/` — Pi → Synology snapshot timer
+- `browser/` — small Chrome-extension prototypes that predate [CopyWizard](https://copywizard.us)
+- `.github/workflows/backup.yml` — self-hosted runner workflow for the universal backup
+
 ---
 
 ### backup/
@@ -33,6 +43,8 @@ Cloudflare domain management and diagnostics.
 |--------|-------------|
 | `cf_trace_domains.py` | Trace domains across all Cloudflare accounts |
 | `cf_configure_redirects.py` | Bulk redirect and DNS configuration |
+| `domains.sh` | Bulk-refresh expiry dates for a CSV of Cloudflare-registered zones |
+| `get_expires.sh` | Look up a single domain's expiry date via Cloudflare Registrar |
 
 ### comics/
 Comic book archive processing and metadata management.
@@ -136,6 +148,10 @@ File synchronization and Raspberry Pi backup.
 | `pi-backup-prune.sh` | Prune old Pi snapshots |
 | `pi-restore.sh` | Restore Pi from snapshots |
 | `install-pi-synology-backup.sh` | Setup Pi-to-Synology backup system |
+| `netinstall-pi-synology-backup.sh` | One-liner curl-bash installer fetching all Pi backup scripts from this repo |
+| `migrate-nas-snapshots.sh` | NAS-to-NAS rsync helper — migrate Pi snapshots between Synology hosts |
+
+`sync/systemd/` ships `pi-to-synology-snapshot.{service,timer}` for nightly 02:30 runs.
 
 ### system/
 Linux/macOS system maintenance and monitoring.

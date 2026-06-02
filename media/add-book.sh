@@ -3,9 +3,10 @@
 set -o pipefail
 
 # ── Config ──────────────────────────────────────────────────────────────
-BOOKSHELF="/Volumes/Yoda/Bookshelf"
+# Override via env vars: BOOKSHELF, OBSIDIAN_BOOKS
+BOOKSHELF="${BOOKSHELF:-/Volumes/Yoda/Bookshelf}"
 INBOX="$BOOKSHELF/_Inbox"
-OBSIDIAN_BOOKS="/Users/michal/Obsidian/Obsidian-Master/books"
+OBSIDIAN_BOOKS="${OBSIDIAN_BOOKS:-$HOME/Obsidian/Obsidian-Master/books}"
 COVERS_DIR="$OBSIDIAN_BOOKS/covers"
 
 PDF_CATEGORIES=("America" "Business" "Classic Fiction" "Conspiracy" "Esoteric" "For Dummies" "Gaming" "Health" "Reference" "Religion" "Technology")

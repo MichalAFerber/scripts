@@ -1,0 +1,29 @@
+# Example exclude patterns (one per line)
+# Comments starting with # are ignored
+
+# macOS
+.DS_Store
+.AppleDouble
+.Spotlight-V100/
+.Trashes/
+.fseventsd/
+
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+.cache/
+tmp/
+*.swp
+*.tmp
+
+# VCS
+.git/
+.svn/
+.hg/
+
+# Media/sidecars
+*.xmp
+*.aux
