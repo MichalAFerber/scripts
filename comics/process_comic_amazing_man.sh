@@ -1,6 +1,27 @@
 #!/usr/bin/env bash
 set -e
 
+# process_comic_amazing_man.sh - Rename, Convert, and Tag Amazing-Man Comics
+#
+# Processes Amazing-Man Comics files:
+#   1. Renames from "Amazing-Man-Comics-###-YYYY.ext" to "Amazing-Man Comics #001 (YYYY).ext"
+#   2. Detects ZIP files mislabeled as .cbr and converts them to .cbz
+#   3. Generates and embeds ComicInfo.xml metadata
+#
+# Usage:
+#   bash process_comic_amazing_man.sh [--dry-run]
+#
+# Options:
+#   --dry-run   Preview all actions without making changes
+
+# Options
+DRY_RUN=false
+for arg in "$@"; do
+  case "$arg" in
+    --dry-run) DRY_RUN=true ;;
+  esac
+done
+
 # Function: create ComicInfo.xml for a given issue/year
 create_comicinfo() {
   local issue="$1"
@@ -57,6 +78,17 @@ for f in Amazing-Man-Comics-*; do
       continue
     fi
 
+    if [ "$DRY_RUN" = true ]; then
+      echo "[DRY RUN] Would rename: $f -> $newname"
+      if [[ "$ext" == "cbr" ]] && is_zip_mislabeled "$f"; then
+        echo "[DRY RUN] Would convert mislabeled ZIP (.cbr) -> .cbz: $newname -> ${newname%.cbr}.cbz"
+        ext="cbz"
+        newname="${newname%.cbr}.cbz"
+      fi
+      echo "[DRY RUN] Would generate and embed ComicInfo.xml into $newname"
+      continue
+    fi
+
     echo "Renaming: $f -> $newname"
     mv "$f" "$newname"
   else
@@ -89,4 +121,3 @@ done
 
 rm -f ComicInfo.xml
 echo "Done!"
-

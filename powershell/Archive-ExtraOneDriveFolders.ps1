@@ -1,4 +1,4 @@
-<# 
+<#
 Archives (zips) any extra OneDrive folders under the user profile and deletes them
 after a successful archive. Archives are saved to the active OneDrive's Documents folder.
 
@@ -7,7 +7,14 @@ Tested on Windows 11 / PowerShell 5+.
 Usage:
   - Right-click PowerShell -> Run as administrator (not strictly required, but helpful).
   - Run:  Set-ExecutionPolicy -Scope Process Bypass; .\Archive-ExtraOneDriveFolders.ps1
+  - Dry run:  .\Archive-ExtraOneDriveFolders.ps1 -DryRun
 #>
+[CmdletBinding(SupportsShouldProcess)]
+param(
+    [switch]$DryRun
+)
+
+if ($DryRun) { $WhatIfPreference = $true }
 
 $ErrorActionPreference = 'Stop'
 
@@ -44,8 +51,10 @@ if (-not (Test-Path $activeRoot)) { throw "Active OneDrive root path does not ex
 # Ensure destination folder = Active OneDrive\Documents
 $destFolder = Join-Path $activeRoot 'Documents'
 if (-not (Test-Path $destFolder)) {
-    Write-Host "Creating destination folder: $destFolder"
-    New-Item -ItemType Directory -Path $destFolder | Out-Null
+    if ($PSCmdlet.ShouldProcess($destFolder, "Create destination directory")) {
+        Write-Host "Creating destination folder: $destFolder"
+        New-Item -ItemType Directory -Path $destFolder | Out-Null
+    }
 }
 
 # 2) Find all OneDrive* folders in the user profile
@@ -74,13 +83,15 @@ $extras | ForEach-Object { Write-Host "  - $_" }
 
 # Optional: create a log file inside active Documents
 $logPath = Join-Path $destFolder ("OneDrive_Archive_Log_{0}.txt" -f (Get-Date -Format 'yyyyMMdd-HHmmss'))
-"Archive run at $(Get-Date)" | Out-File -FilePath $logPath -Encoding UTF8
+if (-not $WhatIfPreference) {
+    "Archive run at $(Get-Date)" | Out-File -FilePath $logPath -Encoding UTF8
+}
 
 foreach ($extraPath in $extras) {
     try {
         if (-not (Test-Path $extraPath)) {
             Write-Warning "Skipped missing path: $extraPath"
-            "SKIP  Missing: $extraPath" | Add-Content $logPath
+            if (-not $WhatIfPreference) { "SKIP  Missing: $extraPath" | Add-Content $logPath }
             continue
         }
 
@@ -92,39 +103,47 @@ foreach ($extraPath in $extras) {
         Write-Host "`nZipping: $extraPath" -ForegroundColor Cyan
         Write-Host "   -> $zipPath"
 
-        # Ensure the zip doesn't already exist
-        if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
+        if ($PSCmdlet.ShouldProcess($extraPath, "Compress to $zipPath")) {
+            # Ensure the zip doesn't already exist
+            if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
 
-        # 4) Zip the folder
-        Compress-Archive -Path (Join-Path $extraPath '*') -DestinationPath $zipPath -CompressionLevel Optimal
+            # 4) Zip the folder
+            Compress-Archive -Path (Join-Path $extraPath '*') -DestinationPath $zipPath -CompressionLevel Optimal
 
-        # Verify zip creation and non-zero length
-        if (-not (Test-Path $zipPath)) { throw "Archive was not created: $zipPath" }
-        $zipInfo = Get-Item $zipPath
-        if ($zipInfo.Length -le 0)     { throw "Archive appears empty: $zipPath" }
+            # Verify zip creation and non-zero length
+            if (-not (Test-Path $zipPath)) { throw "Archive was not created: $zipPath" }
+            $zipInfo = Get-Item $zipPath
+            if ($zipInfo.Length -le 0)     { throw "Archive appears empty: $zipPath" }
 
-        "OK    Archived $extraPath -> $zipPath  ($([math]::Round($zipInfo.Length/1MB,2)) MB)" | Add-Content $logPath
+            "OK    Archived $extraPath -> $zipPath  ($([math]::Round($zipInfo.Length/1MB,2)) MB)" | Add-Content $logPath
+        }
 
         # 5) Confirm deletion
-        $confirm = Read-Host "Delete the original folder? [Y/N] `n  $extraPath"
-        if ($confirm -match '^(y|yes)$') {
-            Write-Host "Removing: $extraPath" -ForegroundColor Yellow
-            Remove-Item -LiteralPath $extraPath -Recurse -Force
-            if (Test-Path $extraPath) {
-                throw "Deletion reported success but path still exists: $extraPath"
+        if ($PSCmdlet.ShouldProcess($extraPath, "Delete original folder")) {
+            $confirm = Read-Host "Delete the original folder? [Y/N] `n  $extraPath"
+            if ($confirm -match '^(y|yes)$') {
+                Write-Host "Removing: $extraPath" -ForegroundColor Yellow
+                Remove-Item -LiteralPath $extraPath -Recurse -Force
+                if (Test-Path $extraPath) {
+                    throw "Deletion reported success but path still exists: $extraPath"
+                }
+                "DEL   $extraPath" | Add-Content $logPath
+            } else {
+                Write-Host "Skipped deletion for: $extraPath"
+                "SKIP  Delete: $extraPath" | Add-Content $logPath
             }
-            "DEL   $extraPath" | Add-Content $logPath
-        } else {
-            Write-Host "Skipped deletion for: $extraPath"
-            "SKIP  Delete: $extraPath" | Add-Content $logPath
         }
     }
     catch {
         $msg = $_.Exception.Message
         Write-Error "Failed on $extraPath : $msg"
-        "ERR   $extraPath : $msg" | Add-Content $logPath
+        if (-not $WhatIfPreference) { "ERR   $extraPath : $msg" | Add-Content $logPath }
         # continue to next folder
     }
 }
 
-Write-Host "`nDone. Log saved to: $logPath" -ForegroundColor Green
+if (-not $WhatIfPreference) {
+    Write-Host "`nDone. Log saved to: $logPath" -ForegroundColor Green
+} else {
+    Write-Host "`nDry run complete. No changes were made." -ForegroundColor Green
+}

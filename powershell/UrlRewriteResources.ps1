@@ -1,43 +1,66 @@
+<#
+.SYNOPSIS
+    Installs the IIS URL Rewrite Module and configures allowed server variables.
+.DESCRIPTION
+    Downloads and installs the IIS URL Rewrite Module 2.0, then adds required
+    rewrite allowedServerVariables (HTTPS, HTTP_X_FORWARDED_FOR,
+    HTTP_X_FORWARDED_PROTO, REMOTE_ADDR) to applicationHost.config.
+.PARAMETER DryRun
+    If set, displays what actions would be taken without making any changes.
+#>
+[CmdletBinding(SupportsShouldProcess)]
+param(
+    [switch]$DryRun
+)
 
+if ($DryRun) { $WhatIfPreference = $true }
 
-			Package UrlRewrite
-			{
-				#Install URL Rewrite module for IIS
-				DependsOn = "[WindowsFeaturesWebServer]windowsFeatures"
-				Ensure = "Present"
-				Name = "IIS URL Rewrite Module 2"
-				Path = "http://download.microsoft.com/download/6/7/D/67D80164-7DD0-48AF-86E3-DE7A182D6815/rewrite_2.0_rtw_x64.msi"
-				Arguments = "/quiet"
-				ProductId = "EB675D0A-2C95-405B-BEE8-B42A65D23E11"
-			}
+Import-Module WebAdministration -ErrorAction Stop
 
-			Script ReWriteRules
-			{
-				#Adds rewrite allowedServerVariables to applicationHost.config
-				DependsOn = "[Package]UrlRewrite"
-				SetScript = {
-					$current = Get-WebConfiguration /system.webServer/rewrite/allowedServerVariables | select -ExpandProperty collection | ?{$_.ElementTagName -eq "add"} | select -ExpandProperty name
-					$expected = @("HTTPS", "HTTP_X_FORWARDED_FOR", "HTTP_X_FORWARDED_PROTO", "REMOTE_ADDR")
-					$missing = $expected | where {$current -notcontains $_}
-					try
-					{
-						Start-WebCommitDelay 
-						$missing | %{ Add-WebConfiguration /system.webServer/rewrite/allowedServerVariables -atIndex 0 -value @{name="$_"} -Verbose }
-						Stop-WebCommitDelay -Commit $true 
-					} 
-					catch [System.Exception]
-					{ 
-						$_ | Out-String
-					}
-				}
-				TestScript = {
-					$current = Get-WebConfiguration /system.webServer/rewrite/allowedServerVariables | select -ExpandProperty collection | select -ExpandProperty name
-					$expected = @("HTTPS", "HTTP_X_FORWARDED_FOR", "HTTP_X_FORWARDED_PROTO", "REMOTE_ADDR")
-					$result = -not @($expected| where {$current -notcontains $_}| select -first 1).Count
-					return $result
-				}
-				GetScript = {
-					$allowedServerVariables = Get-WebConfiguration /system.webServer/rewrite/allowedServerVariables | select -ExpandProperty collection
-					return $allowedServerVariables
-				}
-			}
+$rewriteMsiUrl = "http://download.microsoft.com/download/6/7/D/67D80164-7DD0-48AF-86E3-DE7A182D6815/rewrite_2.0_rtw_x64.msi"
+$productName   = "IIS URL Rewrite Module 2"
+$productId     = "EB675D0A-2C95-405B-BEE8-B42A65D23E11"
+
+# 1) Install URL Rewrite module if not present
+$installed = Get-WmiObject -Class Win32_Product | Where-Object { $_.IdentifyingNumber -eq "{$productId}" }
+if (-not $installed) {
+    if ($PSCmdlet.ShouldProcess($productName, "Download and install from $rewriteMsiUrl")) {
+        Write-Host "Installing $productName..."
+        $msiPath = Join-Path $env:TEMP "rewrite_2.0_rtw_x64.msi"
+        Invoke-WebRequest -Uri $rewriteMsiUrl -OutFile $msiPath
+        Start-Process msiexec.exe -Wait -ArgumentList "/i `"$msiPath`" /quiet"
+        Write-Host "$productName installed successfully."
+    }
+}
+else {
+    Write-Host "$productName is already installed. Skipping..."
+}
+
+# 2) Add rewrite allowedServerVariables
+$expected = @("HTTPS", "HTTP_X_FORWARDED_FOR", "HTTP_X_FORWARDED_PROTO", "REMOTE_ADDR")
+$current  = Get-WebConfiguration /system.webServer/rewrite/allowedServerVariables |
+    Select-Object -ExpandProperty collection |
+    Where-Object { $_.ElementTagName -eq "add" } |
+    Select-Object -ExpandProperty name
+
+$missing = $expected | Where-Object { $current -notcontains $_ }
+
+if ($missing) {
+    if ($PSCmdlet.ShouldProcess("allowedServerVariables: $($missing -join ', ')", "Add to applicationHost.config")) {
+        Write-Host "Adding missing allowedServerVariables: $($missing -join ', ')"
+        try {
+            Start-WebCommitDelay
+            $missing | ForEach-Object {
+                Add-WebConfiguration /system.webServer/rewrite/allowedServerVariables -atIndex 0 -value @{ name = "$_" } -Verbose
+            }
+            Stop-WebCommitDelay -Commit $true
+            Write-Host "Server variables added successfully."
+        }
+        catch [System.Exception] {
+            Write-Error "Failed to add server variables: $_"
+        }
+    }
+}
+else {
+    Write-Host "All expected allowedServerVariables are already configured."
+}

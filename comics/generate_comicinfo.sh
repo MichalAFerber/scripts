@@ -6,10 +6,21 @@
 # the XML is left alongside the file (CBR archives can't be safely modified).
 #
 # Usage:
-#   cd ~/Desktop/Amazing-Man-Comics && bash generate_comicinfo.sh
+#   cd ~/Desktop/Amazing-Man-Comics && bash generate_comicinfo.sh [--dry-run]
+#
+# Options:
+#   --dry-run   Preview what would be created/embedded without making changes
 #
 # Expected filename format: "Amazing-Man Comics #005 (1939).cbz"
 # The series name is hardcoded to "Amazing-Man Comics".
+
+# Options
+DRY_RUN=false
+for arg in "$@"; do
+  case "$arg" in
+    --dry-run) DRY_RUN=true ;;
+  esac
+done
 
 # Folder containing your comics
 COMIC_DIR="$HOME/Desktop/Amazing-Man-Comics"
@@ -28,8 +39,19 @@ for f in *.{cbz,cbr}; do
   ext="${f##*.}"
   base="${f%.*}"
 
-  # Create ComicInfo.xml
   xml_file="${base}_ComicInfo.xml"
+
+  if [ "$DRY_RUN" = true ]; then
+    echo "[DRY RUN] Would create $xml_file"
+    if [[ "$ext" == "cbz" ]]; then
+      echo "[DRY RUN] Would embed ComicInfo.xml into $f and remove $xml_file"
+    else
+      echo "[DRY RUN] Would leave $xml_file next to $f (CBR cannot be directly modified safely)"
+    fi
+    continue
+  fi
+
+  # Create ComicInfo.xml
   cat > "$xml_file" <<EOF
 <?xml version="1.0"?>
 <ComicInfo>
@@ -57,4 +79,3 @@ EOF
 done
 
 echo "Done!"
-

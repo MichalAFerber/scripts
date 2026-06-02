@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# universal_downloader.sh — YouTube / Rumble / TikTok / X downloader
+# universal_downloader.sh — YouTube / Rumble / TikTok / X / Telegram downloader
 # - Single, interactive, or batch (.txt/.csv)
 # - Optional output folder everywhere (default: $HOME/Downloads)
 #
@@ -8,9 +8,14 @@
 #   ./universal_downloader.sh <url> [filename] [folder]
 #   ./universal_downloader.sh list.txt
 #   ./universal_downloader.sh list.csv
+#   ./universal_downloader.sh --dry-run <url> [filename] [folder]
+#   ./universal_downloader.sh --dry-run list.txt
 #
 # TXT: each line = "url" OR "url,filename" OR "url,filename,folder"
 # CSV: columns: url,filename,folder   (header optional; quotes OK if no embedded commas)
+#
+# Options:
+#   --dry-run   Show what would be downloaded without actually downloading.
 #
 # Env:
 #   YTDLP_BROWSER=chrome|firefox|brave|edge|chromium   (default for non-YouTube: chrome)
@@ -19,6 +24,16 @@
 #   YTDLP_VERBOSE=1                                    (echo yt-dlp commands)
 
 set -euo pipefail
+
+DRY_RUN=false
+POSITIONAL=()
+for arg in "$@"; do
+  case "$arg" in
+    --dry-run) DRY_RUN=true ;;
+    *) POSITIONAL+=("$arg") ;;
+  esac
+done
+set -- "${POSITIONAL[@]+"${POSITIONAL[@]}"}"
 
 need() { command -v "$1" >/dev/null 2>&1 || { echo "Missing dependency: $1" >&2; exit 1; }; }
 need yt-dlp
@@ -65,7 +80,7 @@ detect_site_and_normalize() {
   printf '%s|%s' "$site" "$norm"
 }
 
-# -------- YouTube flow: Safari cookies → Android (no cookies) → iOS (no cookies)
+# -------- YouTube flow: Safari cookies -> Android (no cookies) -> iOS (no cookies)
 download_youtube() {
   local url="$1"
   local outtpl="$2"
@@ -74,29 +89,29 @@ download_youtube() {
   local base=( --cookies-from-browser "$BROWSER_YT" -o "$outtpl" --no-playlist -S "res,ext:mp4:m4a" )
   [[ -n "${YTDLP_VERBOSE:-}" ]] && echo "yt-dlp ${base[*]} \"$url\""
   if yt-dlp "${base[@]}" "$url"; then
-    echo "   ✅ done (YouTube default client)"
+    echo "   done (YouTube default client)"
     return 0
   fi
 
-  echo "   ↻ SABR suspected; retrying with Android client (NO cookies)…"
-  # 2) Android client, NO cookies (android doesn’t support cookies)
+  echo "   SABR suspected; retrying with Android client (NO cookies)..."
+  # 2) Android client, NO cookies (android doesn't support cookies)
   local android=( --extractor-args "youtube:player_client=android" -o "$outtpl" --no-playlist -S "res,ext:mp4:m4a" )
   [[ -n "${YTDLP_VERBOSE:-}" ]] && echo "yt-dlp ${android[*]} \"$url\""
   if yt-dlp "${android[@]}" "$url"; then
-    echo "   ✅ done (YouTube Android client)"
+    echo "   done (YouTube Android client)"
     return 0
   fi
 
-  echo "   ↻ still failing; trying iOS client (NO cookies)…"
-  # 3) iOS client, NO cookies (often works when android doesn’t)
+  echo "   still failing; trying iOS client (NO cookies)..."
+  # 3) iOS client, NO cookies (often works when android doesn't)
   local ios=( --extractor-args "youtube:player_client=ios" -o "$outtpl" --no-playlist -S "res,ext:mp4:m4a" )
   [[ -n "${YTDLP_VERBOSE:-}" ]] && echo "yt-dlp ${ios[*]} \"$url\""
   if yt-dlp "${ios[@]}" "$url"; then
-    echo "   ✅ done (YouTube iOS client)"
+    echo "   done (YouTube iOS client)"
     return 0
   fi
 
-  echo "   ❌ failed (YouTube)"
+  echo "   failed (YouTube)"
   echo "      Tip: list formats with:"
   echo "        yt-dlp --extractor-args \"youtube:player_client=android\" -F \"$url\""
   return 1
@@ -109,18 +124,18 @@ download_generic_plain_or_cookie_retry() {
 
   [[ -n "${YTDLP_VERBOSE:-}" ]] && echo "yt-dlp ${args[*]} \"$url\""
   if yt-dlp "${args[@]}" "$url"; then
-    echo "   ✅ done"
+    echo "   done"
     return 0
   fi
 
   if [[ "$site" == "x" || "$site" == "tiktok" ]]; then
-    echo "   ↻ retrying with browser cookies ($cookie_browser)…"
+    echo "   retrying with browser cookies ($cookie_browser)..."
     local with_cookies=( --cookies-from-browser "$cookie_browser" -o "$outtpl" --no-playlist )
     [[ -n "${YTDLP_VERBOSE:-}" ]] && echo "yt-dlp ${with_cookies[*]} \"$url\""
-    yt-dlp "${with_cookies[@]}" "$url" && { echo "   ✅ done (with cookies)"; return 0; }
+    yt-dlp "${with_cookies[@]}" "$url" && { echo "   done (with cookies)"; return 0; }
   fi
 
-  echo "   ❌ failed"; return 1
+  echo "   failed"; return 1
 }
 
 # url, outname (no ext), folder
@@ -132,7 +147,6 @@ download_one() {
   url="$(printf '%s' "$url" | trim)"
   folder="$(printf '%s' "${folder:-$DEFAULT_DIR}" | trim)"
   [[ -z "$folder" ]] && folder="$DEFAULT_DIR"
-  mkdir -p "$folder"
 
   [[ -z "$url" ]] && return 0
   if ! is_url "$url"; then
@@ -153,7 +167,16 @@ download_one() {
     outtpl="${folder}/%(title)s.%(ext)s"
   fi
 
-  echo "→ [$site] $norm"
+  if $DRY_RUN; then
+    echo "[DRY RUN] Would download [$site] $norm"
+    echo "   would save to: $folder"
+    [[ -n "$outname" ]] && echo "   filename: $outname.<ext>"
+    return 0
+  fi
+
+  mkdir -p "$folder"
+
+  echo "-> [$site] $norm"
   echo "   saving to: $folder"
 
   telegram_helper="${TELEGRAM_HELPER_PATH:-$(dirname "$0")/telegram_dl.py}"
@@ -164,14 +187,14 @@ download_one() {
       telegram_helper="${TELEGRAM_HELPER_PATH:-$(dirname "$0")/telegram_dl.py}"
       venv_bin="$HOME/.universal_downloader/venv/bin/python3"
       [[ -x "$venv_bin" ]] || { echo "Missing Telegram venv: $venv_bin" >&2; return 1; }
-    
+
       local bare_name=""
       [[ -n "$outname" ]] && bare_name="$outname"
-    
+
       echo "   using Telegram helper: $telegram_helper"
       TG_API_ID="${TG_API_ID:?Set TG_API_ID}" TG_API_HASH="${TG_API_HASH:?Set TG_API_HASH}" \
         "$venv_bin" "$telegram_helper" "$norm" "$bare_name" "$folder" \
-        && return 0 || return 1   # ← ensures we don't fall through to yt-dlp
+        && return 0 || return 1
       ;;
   esac
 

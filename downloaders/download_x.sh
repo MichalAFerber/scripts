@@ -2,14 +2,26 @@
 # download_x.sh — universal downloader (YouTube, Rumble, TikTok, X)
 # Usage:
 #   ./download_x.sh
-#     → prompts for URL and filename
+#     -> prompts for URL and filename
 #   ./download_x.sh "https://x.com/user/status/1910110429533077904" "myfile"
-#     → saves as ./myfile.<ext>
+#     -> saves as ./myfile.<ext>
+#   ./download_x.sh --dry-run "https://x.com/user/status/123"
+#     -> shows what would be downloaded without downloading
 #
 # Env:
 #   YTDLP_BROWSER=chrome|firefox|brave|edge|chromium  (default: chrome)
 
 set -euo pipefail
+
+DRY_RUN=false
+POSITIONAL=()
+for arg in "$@"; do
+  case "$arg" in
+    --dry-run) DRY_RUN=true ;;
+    *) POSITIONAL+=("$arg") ;;
+  esac
+done
+set -- "${POSITIONAL[@]+"${POSITIONAL[@]}"}"
 
 BROWSER="${YTDLP_BROWSER:-chrome}"
 
@@ -77,28 +89,16 @@ fi
 # Base args: write to current folder
 ARGS=(-o "$OUTTPL" --no-playlist)
 
-# Site-specific tweaks
-case "$site" in
-  youtube)
-    # Nothing special; yt-dlp does great by default
-    ;;
-  rumble)
-    # Rumble can be slow to probe; keep defaults
-    ;;
-  tiktok)
-    # Often needs cookies for age/region. We'll try no cookies first, then retry with browser.
-    ;;
-  x)
-    # X frequently needs cookies; we’ll attempt plain then cookie-backed.
-    ;;
-  generic)
-    ;;
-esac
-
-echo "→ Detected site: $site"
-echo "→ Saving as template: $OUTTPL"
-echo "→ URL: $norm_url"
+echo "-> Detected site: $site"
+echo "-> Saving as template: $OUTTPL"
+echo "-> URL: $norm_url"
 echo
+
+if $DRY_RUN; then
+  echo "[DRY RUN] Would download from [$site]: $norm_url"
+  echo "   output template: $OUTTPL"
+  exit 0
+fi
 
 # Try download; for X/TikTok add cookie retry
 try_plain() {
@@ -106,7 +106,7 @@ try_plain() {
 }
 
 try_with_cookies() {
-  echo "Retrying with browser cookies (${BROWSER})…"
+  echo "Retrying with browser cookies (${BROWSER})..."
   yt-dlp --cookies-from-browser "$BROWSER" "${ARGS[@]}" "$norm_url"
 }
 
@@ -126,13 +126,12 @@ else
 fi
 
 if [[ "$success" -eq 1 ]]; then
-  echo "✅ Done."
+  echo "Done."
 else
-  echo "❌ Download failed."
+  echo "Download failed."
   echo "Tips:"
-  echo "  • Make sure you can view the video in your browser (age/protection/region)."
-  echo "  • Set YTDLP_BROWSER=firefox (or chrome/brave/edge/chromium) and retry."
-  echo "  • For X quoted posts: open the quoted post and use its link."
+  echo "  - Make sure you can view the video in your browser (age/protection/region)."
+  echo "  - Set YTDLP_BROWSER=firefox (or chrome/brave/edge/chromium) and retry."
+  echo "  - For X quoted posts: open the quoted post and use its link."
   exit 3
 fi
-

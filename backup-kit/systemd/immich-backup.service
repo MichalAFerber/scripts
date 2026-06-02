@@ -1,8 +1,0 @@
-[Unit]
-Description=Immich nightly DB dump + uploads sync
-After=network-online.target
-
-[Service]
-Type=oneshot
-Environment=HC_URL=
-ExecStart=/usr/local/bin/immich-backup.sh

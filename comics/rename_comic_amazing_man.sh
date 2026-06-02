@@ -5,11 +5,22 @@
 # "Amazing-Man Comics #005 (1939).cbz" format with zero-padded issue numbers.
 #
 # Usage:
-#   bash rename_comic_amazing_man.sh
+#   bash rename_comic_amazing_man.sh [--dry-run]
+#
+# Options:
+#   --dry-run   Preview renames without making changes
 #
 # Source directory: $HOME/Desktop/Amazing-Man-Comics (hardcoded)
 # Input pattern:   Amazing-Man-Comics-<issue>-<year>.<ext>
 # Output pattern:  Amazing-Man Comics #<issue_padded> (<year>).<ext>
+
+# Options
+DRY_RUN=false
+for arg in "$@"; do
+  case "$arg" in
+    --dry-run) DRY_RUN=true ;;
+  esac
+done
 
 COMIC_DIR="$HOME/Desktop/Amazing-Man-Comics"
 cd "$COMIC_DIR" || exit 1
@@ -29,10 +40,13 @@ for f in Amazing-Man-Comics-*.{cbz,cbr}; do
   newname="Amazing-Man Comics #${issue_padded} (${year}).${ext}"
 
   if [[ "$f" != "$newname" ]]; then
-    echo "Renaming: $f -> $newname"
-    mv "$f" "$newname"
+    if [ "$DRY_RUN" = true ]; then
+      echo "[DRY RUN] Would rename: $f -> $newname"
+    else
+      echo "Renaming: $f -> $newname"
+      mv "$f" "$newname"
+    fi
   else
     echo "Skipping $f (already formatted)"
   fi
 done
-

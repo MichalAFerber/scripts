@@ -1,8 +1,0 @@
-[Unit]
-Description=Offsite sync of snapshot folder to Wasabi
-After=network-online.target
-
-[Service]
-Type=oneshot
-Environment=HC_URL=
-ExecStart=/usr/local/bin/linux-offsite-sync.sh

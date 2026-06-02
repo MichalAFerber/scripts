@@ -6,6 +6,9 @@ Usage:
   TG_API_ID=123 TG_API_HASH=abc... \
   python3 telegram_dl.py <t.me URL> [outname-without-ext] [folder]
 
+  TG_API_ID=123 TG_API_HASH=abc... \
+  python3 telegram_dl.py --dry-run <t.me URL> [outname-without-ext] [folder]
+
 Supported links:
   https://t.me/<username>/<msg_id>
   https://t.me/c/<internal_chat_id>/<msg_id>     # private groups/channels
@@ -22,6 +25,13 @@ from telethon.errors import MessageIdInvalidError
 
 def err(msg): print(msg, file=sys.stderr); sys.exit(1)
 
+# --- parse --dry-run ---
+dry_run = False
+argv = sys.argv[1:]
+if "--dry-run" in argv:
+    dry_run = True
+    argv.remove("--dry-run")
+
 # --- creds ---
 if "TG_API_ID" not in os.environ or "TG_API_HASH" not in os.environ:
     err("Missing TG_API_ID / TG_API_HASH env vars.")
@@ -29,15 +39,14 @@ api_id  = int(os.environ["TG_API_ID"])
 api_hash= os.environ["TG_API_HASH"]
 
 # --- args ---
-if len(sys.argv) < 2:
-    err("Usage: TG_API_ID=... TG_API_HASH=... python3 telegram_dl.py <t.me URL> [outname] [folder]")
+if len(argv) < 1:
+    err("Usage: TG_API_ID=... TG_API_HASH=... python3 telegram_dl.py [--dry-run] <t.me URL> [outname] [folder]")
 
-url     = sys.argv[1]
-outname = sys.argv[2] if len(sys.argv) >= 3 else ""
-folder  = sys.argv[3] if len(sys.argv) >= 4 else os.path.join(os.path.expanduser("~"), "Downloads")
+url     = argv[0]
+outname = argv[1] if len(argv) >= 2 else ""
+folder  = argv[2] if len(argv) >= 3 else os.path.join(os.path.expanduser("~"), "Downloads")
 
 folder_path = pathlib.Path(folder).expanduser().resolve()
-folder_path.mkdir(parents=True, exist_ok=True)
 
 # Session file dir (configurable)
 sess_dir = pathlib.Path(os.environ.get("TG_SESSION_DIR", os.path.join(os.path.expanduser("~"), ".universal_downloader")))
@@ -74,6 +83,15 @@ try:
         msg_id = int(parts[1])
 except ValueError:
     err("Message ID (or internal chat id) is not numeric.")
+
+if dry_run:
+    print(f"[DRY RUN] Would download message {msg_id} from {entity}")
+    print(f"   would save to: {folder_path}")
+    if outname.strip():
+        print(f"   filename: {outname}")
+    sys.exit(0)
+
+folder_path.mkdir(parents=True, exist_ok=True)
 
 async def run():
     async with TelegramClient(session_path, api_id, api_hash) as client:
