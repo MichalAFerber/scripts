@@ -1,0 +1,4 @@
+theme: jekyll-theme-cayman
+title: MichalAFerber/scripts
+description: Practical bash, python, and powershell helpers for homelab, backup, sync, media, and system automation — every file-modifying script supports --dry-run.
+show_downloads: false
