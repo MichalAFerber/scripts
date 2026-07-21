@@ -7,9 +7,21 @@ OWNER="${OWNER:-MichalAFerber}"   # user or org
 BASE_DIR="${BASE_DIR:-/srv/backup/github/$OWNER}"
 REMOTE="${REMOTE:-wasabi-crypt:github/$OWNER}"
 LOG_FILE="${LOG_FILE:-/var/log/github-mirror.log}"
+# Clone transport. https (default) authenticates through git's credential helper
+# -- on macOS that is `gh auth git-credential`, which reads the keyring and works
+# fine with no TTY. ssh instead needs an ssh-agent holding an unlocked key, which
+# launchd and cron do NOT provide, so a passphrase-protected key fails there with
+# "Permission denied (publickey)". Use ssh only for unattended keys.
+CLONE_PROTO="${CLONE_PROTO:-https}"
 HC_URL="${HC_URL:-}"   # Healthchecks.io ping URL (optional)
 DRY_RUN=false
 ###############################################################################
+
+case "$CLONE_PROTO" in
+  https) CLONE_FIELD=url ;;
+  ssh)   CLONE_FIELD=sshUrl ;;
+  *) echo "[ERROR] CLONE_PROTO must be 'https' or 'ssh' (got: $CLONE_PROTO)" >&2; exit 2 ;;
+esac
 
 # Parse arguments
 for arg in "$@"; do
@@ -35,8 +47,8 @@ mkdir -p "$BASE_DIR" "$(dirname "$LOG_FILE")"
   echo "=== GitHub mirror for $OWNER: $(date) ==="
   echo "Dry run: $DRY_RUN"
   cd "$BASE_DIR"
-  gh repo list "$OWNER" --limit 1000 --json name,sshUrl,visibility \
-    | jq -r '.[].sshUrl' \
+  gh repo list "$OWNER" --limit 1000 --json name,url,sshUrl,visibility \
+    | jq -r --arg f "$CLONE_FIELD" '.[][$f]' \
     | while read -r url; do
         name=$(basename "$url" .git)
         if [ -d "$name.git" ]; then
