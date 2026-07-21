@@ -24,10 +24,8 @@ Cloud and local backup automation using restic, rclone, and Wasabi S3.
 | Script | Description |
 |--------|-------------|
 | `macos-restic-backup.sh` | Encrypted macOS backups via Restic to S3 |
-| `linux-offsite-sync.sh` | Linux/Pi snapshot sync via rclone |
 | `immich-backup.sh` | Immich database dump + uploads sync |
 | `github-mirror.sh` | Full GitHub organization/user repo mirror |
-| `npm-backup.sh` | Nginx Proxy Manager volume backup |
 | `universal_backup.sh` | Cross-platform backup suite (Bash) |
 | `universal_backup.ps1` | Cross-platform backup suite (PowerShell) |
 | `rclone-wasabi-ferber-storage.sh` | Local to Wasabi S3 copy/sync |
