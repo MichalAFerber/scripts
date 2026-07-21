@@ -66,3 +66,17 @@ OUT="$BACKUP_DIR/npm-$STAMP.tgz"
 } | tee -a "$LOG_FILE"
 
 [ -n "$HC_URL" ] && curl -fsS -m 10 --retry 3 -o /dev/null "$HC_URL" || true
+
+# Gatus dead-man's-switch push, run in parallel with the Healthchecks.io ping
+# above during the migration off Healthchecks. Activate by setting both
+# GATUS_PING_URL (this job's external-endpoint URL, e.g.
+# https://gatus-c1.thompsonblack.us/api/v1/endpoints/muster_hb-<job>/external)
+# and GATUS_PING_TOKEN (its bearer) in the job's environment; unset = no-op.
+# Reached only on full success -- set -e aborts earlier on any failure, so a
+# failed or skipped run pushes nothing and Gatus alerts on the silence, the
+# same contract as the Healthchecks ping.
+if [ -n "${GATUS_PING_URL:-}" ] && [ -n "${GATUS_PING_TOKEN:-}" ]; then
+  curl -fsS -m 10 --retry 3 -o /dev/null -X POST \
+    -H "Authorization: Bearer $GATUS_PING_TOKEN" \
+    "$GATUS_PING_URL?success=true" || true
+fi
