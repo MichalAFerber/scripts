@@ -1,6 +1,6 @@
 # Scripts Collection
 ## Michal Ferber
-## Revised Date: 03/27/2026
+## Revised Date: 07/23/2026
 
 A curated collection of automation scripts for home lab management, backup strategies, media organization, and system administration.
 
@@ -11,7 +11,6 @@ Every script that modifies, copies, moves, or deletes files supports a `--dry-ru
 - `backup/systemd/` + `backup/cron/` — schedulers for backup scripts
 - `backup/excludes/` — restic / universal_backup exclude lists
 - `backup/.env.sample` + `backup/rclone-remote-example.md` — config templates for `universal_backup.sh`
-- `dns/systemd/` + `dns/examples/` — Unbound systemd timer pair + zone/server config samples
 - `sync/systemd/` — Pi → Synology snapshot timer
 - `browser/` — small Chrome-extension prototypes that predate [CopyWizard](https://copywizard.us)
 - `.github/workflows/backup.yml` — self-hosted runner workflow for the universal backup
@@ -25,13 +24,11 @@ Cloud and local backup automation using restic, rclone, and Wasabi S3.
 |--------|-------------|
 | `macos-restic-backup.sh` | Encrypted macOS backups via Restic to S3 |
 | `immich-backup.sh` | Immich database dump + uploads sync |
-| `github-mirror.sh` | Full GitHub organization/user repo mirror |
 | `universal_backup.sh` | Cross-platform backup suite (Bash) |
 | `universal_backup.ps1` | Cross-platform backup suite (PowerShell) |
 | `rclone-wasabi-ferber-storage.sh` | Local to Wasabi S3 copy/sync |
 | `wasabi-consolidate.sh` | Consolidate and deduplicate Wasabi storage |
 | `s3_backup.py` | Python incremental S3 backup |
-| `sync_to_wasabi.sh` | Interactive Wasabi cloud sync for external drives |
 | `wasabi-purge.sh` | Wrapper: `rclone delete --min-age 90d` + `rclone rmdirs --leave-root` |
 
 ### cloudflare/
@@ -53,17 +50,6 @@ Comic book archive processing and metadata management.
 | `generate_comicinfo.sh` | Generate and embed ComicInfo.xml metadata |
 | `rename_comic_amazing_man.sh` | Rename Amazing-Man files to standard format |
 | `process_comic_amazing_man.sh` | Complete Amazing-Man processing pipeline |
-
-### dns/
-Unbound recursive DNS resolver setup and management.
-
-| Script | Description |
-|--------|-------------|
-| `install.sh` | Unbound DNS installation and configuration |
-| `update_dns.sh` | DNS zone update automation |
-| `update-unbound-root-hints.sh` | Refresh root hints file |
-| `sync-to-peer.sh` | Sync config to redundant DNS peer |
-| `dns-check.sh` | DNS resolution validation |
 
 ### docker/
 Docker Compose utilities.
@@ -107,7 +93,6 @@ Media library organization for Plex, books, and music.
 
 | Script | Description |
 |--------|-------------|
-| `add-book.sh` | Add books to library with metadata extraction |
 | `add_music.sh` | Organize, verify, and deduplicate music library |
 | `rename_movies.py` | Auto-rename movie files via IMDb lookup |
 | `rename_movies_for_plex.py` | Batch rename movies for Plex compliance |
@@ -141,7 +126,6 @@ File synchronization and Raspberry Pi backup.
 | `sync_folders.sh` | Bidirectional folder sync wrapper |
 | `sync_folders_option1.py` | Python rsync wrapper (option 1) |
 | `sync_folders_option2.py` | Python rsync wrapper (option 2) |
-| `sync_archives.sh` | Bidirectional sync between external drives |
 | `pi-to-synology-snapshot.sh` | Raspberry Pi to NAS snapshot backup |
 | `pi-backup-prune.sh` | Prune old Pi snapshots |
 | `pi-restore.sh` | Restore Pi from snapshots |
@@ -167,8 +151,8 @@ Linux/macOS system maintenance and monitoring.
 
 | Language | Count |
 |----------|-------|
-| Bash | 40 |
-| Python | 20 |
+| Bash | 28 |
+| Python | 25 |
 | PowerShell | 7 |
 
 ### Common Dependencies
@@ -180,7 +164,7 @@ Linux/macOS system maintenance and monitoring.
 | rsync | sync/ |
 | docker | docker/, system/ |
 | yt-dlp | downloaders/ |
-| curl, jq | cloudflare/, immich/, dns/ |
+| curl, jq | cloudflare/, immich/ |
 | pandas | file-tools/ |
 
 ### License
